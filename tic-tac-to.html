@@ -1,0 +1,206 @@
+<html>
+<head>
+    <title>Responsive Tic Tac Toe Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f2e1c5;
+            color: #213343;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            cursor: pointer;
+            border: 2px solid #000;
+            border-radius: 5px;
+        }
+        .cell:hover {
+            background-color: #f9f9f9;
+        }
+        .status {
+            margin: 20px 0;
+            font-size: 1.5em;
+        }
+        .new-game {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        .new-game:hover {
+            background-color: #0056b3;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        @media (max-width: 600px) {
+            .board {
+                grid-template-columns: repeat(3, 80px);
+                grid-template-rows: repeat(3, 80px);
+            }
+            .cell {
+                width: 80px;
+                height: 80px;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status" id="status">Player X's turn</div>
+        <div class="board" id="board">
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+            <div class="cell" data-cell></div>
+        </div>
+    </div>
+
+    <div id="gameOverModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <p id="gameOverMessage"></p>
+            <button class="new-game" id="modalNewGameButton">New Game</button>
+        </div>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const statusDisplay = document.getElementById('status');
+        const cells = document.querySelectorAll('[data-cell]');
+        const gameOverModal = document.getElementById('gameOverModal');
+        const closeModal = document.getElementById('closeModal');
+        const gameOverMessage = document.getElementById('gameOverMessage');
+        const modalNewGameButton = document.getElementById('modalNewGameButton');
+        let currentPlayer = 'X';
+        let gameActive = true;
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        function handleCellClick(e) {
+            const cell = e.target;
+            const cellIndex = Array.from(cells).indexOf(cell);
+
+            if (cell.textContent !== '' || !gameActive) {
+                return;
+            }
+
+            cell.textContent = currentPlayer;
+            if (checkWin()) {
+                statusDisplay.textContent = `Player ${currentPlayer} wins!`;
+                gameOverMessage.textContent = `Player ${currentPlayer} wins!`;
+                gameActive = false;
+                showModal();
+            } else if (Array.from(cells).every(cell => cell.textContent !== '')) {
+                statusDisplay.textContent = 'Draw!';
+                gameOverMessage.textContent = 'Draw!';
+                gameActive = false;
+                showModal();
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                statusDisplay.textContent = `Player ${currentPlayer}'s turn`;
+            }
+        }
+
+        function checkWin() {
+            return winningConditions.some(condition => {
+                return condition.every(index => {
+                    return cells[index].textContent === currentPlayer;
+                });
+            });
+        }
+
+        function resetGame() {
+            cells.forEach(cell => cell.textContent = '');
+            currentPlayer = 'X';
+            gameActive = true;
+            statusDisplay.textContent = `Player ${currentPlayer}'s turn`;
+            hideModal();
+        }
+
+        function showModal() {
+            gameOverModal.style.display = 'flex';
+        }
+
+        function hideModal() {
+            gameOverModal.style.display = 'none';
+        }
+
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        closeModal.addEventListener('click', hideModal);
+        modalNewGameButton.addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
